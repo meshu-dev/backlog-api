@@ -5,20 +5,22 @@ namespace App\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Service\SerializeService;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Service\JsonResponseService;
+use App\Service\ValidationService;
 use App\Repository\CategoryRepository;
 use App\Repository\ItemRepository;
 use App\Factory\ItemFactory;
 
-class ItemController extends BaseController
+class ItemController extends ApiController
 {
     public function __construct(
         protected CategoryRepository $categoryRepository,
         protected ItemRepository $itemRepository,
-        protected ItemFactory $itemFactory,
-        SerializeService $serializeService
+        protected ValidationService $validationService,
+        JsonResponseService $jsonResponseService
     ) {
-        parent::__construct($serializeService);
+        parent::__construct($jsonResponseService);
     }
 
     #[Route('/items', name: 'item_get_all', methods: ['GET'])]
@@ -26,32 +28,38 @@ class ItemController extends BaseController
     {
         $items = $this->itemRepository->findAll();
 
-        return $this->getJson($items);
+        return $this->getResponse($items);
     }
 
     #[Route('/items/{id}', name: 'item_get', methods: ['GET'])]
     public function get(int $id): JsonResponse
     {
         $item = $this->itemRepository->find($id);
-        
-        return $this->getJson($item);
+
+        if ($item == null) {
+            return $this->getErrorResponse(['id' => "Item with specified id doesn't exist"]);
+        }
+
+        return $this->getResponse($item);
     }
 
     #[Route('/items', name: 'item_add', methods: ['POST'])]
-    public function add(Request $request): JsonResponse
+    public function add(Request $request, ItemFactory $itemFactory): JsonResponse
     {
-        $params = $this->getRequestJson($request);
+        $params = $this->getRequestParams($request);
         $category = $this->categoryRepository->find($params['category_id']);
 
-        if (!$category) {
-            return $this->json(["Category doesn't exist"], 404);
+        if ($category == null) {
+            return $this->getErrorResponse(['id' => "Category with specified id doesn't exist"]);
         }
 
-        $item = $this->itemFactory->make($category, $params['name']);
+        $item = $itemFactory->make($category, $params['name']);
+
+        $errors = $this->validationService->validateEntity($item);
 
         $this->itemRepository->save($item, true);
         
-        return $this->getJson($item, 201);
+        return $this->getResponse($item, 201);
     }
 
     #[Route('/items/{id}', name: 'item_edit', methods: ['PUT'])]
@@ -59,22 +67,24 @@ class ItemController extends BaseController
     {
         $item = $this->itemRepository->find($id);
 
-        if (!$item) {
-            return $this->json(["Item doesn't exist"], 404);
+        if ($item == null) {
+            return $this->getErrorResponse(['id' => "Item with specified id doesn't exist"]);
         }
-        $params = $this->getRequestJson($request);
+        $params = $this->getRequestParams($request);
      
         $category = $this->categoryRepository->find($params['category_id']);
 
-        if (!$category) {
-            return $this->json(["Category doesn't exist"], 404);
+        if ($category == null) {
+            return $this->getErrorResponse(['id' => "Category with specified id doesn't exist"]);
         }
         $item->setCategory($category);
         $item->setName($params['name']);
 
+        $errors = $this->validationService->validateEntity($item);
+
         $this->itemRepository->save($item, true);
         
-        return $this->getJson($item);
+        return $this->getResponse($item);
     }
 
     #[Route('/items/{id}', name: 'item_delete', methods: ['DELETE'])]
@@ -82,12 +92,12 @@ class ItemController extends BaseController
     {
         $item = $this->itemRepository->find($id);
 
-        if (!$item) {
-            return $this->json(["Item doesn't exist"], 404);
+        if ($item == null) {
+            return $this->getErrorResponse(['id' => "Item with specified id doesn't exist"]);
         }
 
         $this->itemRepository->remove($item, true);
         
-        return $this->getJson([], 204);
+        return $this->getResponse([], 204);
     }
 }

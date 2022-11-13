@@ -5,18 +5,20 @@ namespace App\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Service\SerializeService;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Service\JsonResponseService;
 use App\Repository\CategoryRepository;
 use App\Factory\CategoryFactory;
+use App\Service\ValidationService;
 
-class CategoryController extends BaseController
+class CategoryController extends ApiController
 {
     public function __construct(
         protected CategoryRepository $categoryRepository,
-        protected CategoryFactory $categoryFactory,
-        SerializeService $serializeService
+        protected ValidationService $validationService,
+        JsonResponseService $jsonResponseService
     ) {
-        parent::__construct($serializeService);
+        parent::__construct($jsonResponseService);
     }
 
     #[Route('/categories', name: 'category_get_all', methods: ['GET'])]
@@ -24,7 +26,7 @@ class CategoryController extends BaseController
     {
         $categories = $this->categoryRepository->findAll();
 
-        return $this->getJson($categories);
+        return $this->getResponse($categories);
     }
 
     #[Route('/categories/{id}', name: 'category_get', methods: ['GET'])]
@@ -32,18 +34,24 @@ class CategoryController extends BaseController
     {
         $category = $this->categoryRepository->find($id);
         
-        return $this->getJson($category);
+        if ($category == null) {
+            return $this->getErrorResponse(['id' => "Category with specified id doesn't exist"]);
+        }
+
+        return $this->getResponse($category);
     }
 
     #[Route('/categories', name: 'category_add', methods: ['POST'])]
-    public function add(Request $request): JsonResponse
+    public function add(Request $request, CategoryFactory $categoryFactory): JsonResponse
     {
-        $params = $this->getRequestJson($request);
-        $category = $this->categoryFactory->make($params['name']);
+        $params = $this->getRequestParams($request);
+        $category = $categoryFactory->make($params['name']);
+
+        $errors = $this->validationService->validateEntity($category);
 
         $this->categoryRepository->save($category, true);
         
-        return $this->getJson($category, 201);
+        return $this->getResponse($category, 201);
     }
 
     #[Route('/categories/{id}', name: 'category_edit', methods: ['PUT'])]
@@ -51,15 +59,17 @@ class CategoryController extends BaseController
     {
         $category = $this->categoryRepository->find($id);
 
-        if (!$category) {
-            return $this->json(["Category doesn't exist"], 404);
+        if ($category == null) {
+            return $this->getErrorResponse(['id' => "Category with specified id doesn't exist"]);
         }
-        $params = $this->getRequestJson($request);
+        $params = $this->getRequestParams($request);
         $category->setName($params['name']);
+
+        $errors = $this->validationService->validateEntity($category);
 
         $this->categoryRepository->save($category, true);
         
-        return $this->getJson($category);
+        return $this->getResponse($category);
     }
 
     #[Route('/categories/{id}', name: 'category_delete', methods: ['DELETE'])]
@@ -67,12 +77,12 @@ class CategoryController extends BaseController
     {
         $category = $this->categoryRepository->find($id);
 
-        if (!$category) {
-            return $this->json(["Category doesn't exist"], 404);
+        if ($category == null) {
+            return $this->getErrorResponse(['id' => "Category with specified id doesn't exist"]);
         }
 
         $this->categoryRepository->remove($category, true);
         
-        return $this->getJson([], 204);
+        return $this->getResponse([], 204);
     }
 }

@@ -15,9 +15,17 @@ class Item
 
     #[ORM\ManyToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
     private ?Category $category = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank]
+    #[Assert\Length(
+        min: 2,
+        max: 100,
+        minMessage: 'Item name must be at least {{ limit }} characters long',
+        maxMessage: 'Item name cannot be longer than {{ limit }} characters',
+    )]
     private ?string $name = null;
 
     public function getId(): ?int
