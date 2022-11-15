@@ -86,13 +86,7 @@ class CategoryTest extends BaseCategoryTest
         $statusCode = $result['statusCode'];
         $data = $result['content'];
 
-        $this->assertEquals(400, $statusCode);
-        $this->assertArrayHasKey('errors', $data);
-        $this->assertArrayHasKey('id', $data['errors']);
-        $this->assertEquals(
-            $data['errors']['id'],
-            "Category with specified id doesn't exist"
-        );
+        $this->assertInvalidId($statusCode, $data);
     }
 
     public function testAddingCategory(): void
@@ -190,5 +184,23 @@ class CategoryTest extends BaseCategoryTest
 
         $this->assertEquals(401, $result['statusCode']);
         $this->assertUnauthenticated($result['content']);
+    }
+
+    public function testDeletingCategoryByInvalidId(): void
+    {
+        $token = $this->getAuthToken();
+        $invalidId = $this->getInvalidId();
+
+        $result = $this->request(
+            'DELETE',
+            "{$this->apiUrl}/$invalidId",
+            [],
+            $token
+        );
+
+        $statusCode = $result['statusCode'];
+        $data = $result['content'];
+
+        $this->assertInvalidId($statusCode, $data);
     }
 }

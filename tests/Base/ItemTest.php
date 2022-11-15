@@ -23,6 +23,17 @@ abstract class ItemTest extends ApiTest
         }
     }
 
+    protected function assertInvalidId($statusCode, $data)
+    {
+        $this->assertEquals(400, $statusCode);
+        $this->assertArrayHasKey('errors', $data);
+        $this->assertArrayHasKey('id', $data['errors']);
+        $this->assertEquals(
+            $data['errors']['id'],
+            "Item with specified id doesn't exist"
+        );
+    }
+
     protected function getItems($token)
     {
         $result = $this->request(

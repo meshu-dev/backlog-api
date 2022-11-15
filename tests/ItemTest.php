@@ -85,13 +85,7 @@ class ItemTest extends BaseItemTest
         $statusCode = $result['statusCode'];
         $data = $result['content'];
 
-        $this->assertEquals(400, $statusCode);
-        $this->assertArrayHasKey('errors', $data);
-        $this->assertArrayHasKey('id', $data['errors']);
-        $this->assertEquals(
-            $data['errors']['id'],
-            "Item with specified id doesn't exist"
-        );
+        $this->assertInvalidId($statusCode, $data);
     }
 
     public function testAddingItem(): void
@@ -207,5 +201,23 @@ class ItemTest extends BaseItemTest
 
         $this->assertEquals(401, $result['statusCode']);
         $this->assertUnauthenticated($result['content']);
+    }
+
+    public function testDeletingItemByInvalidId(): void
+    {
+        $token = $this->getAuthToken();
+        $invalidId = $this->getInvalidId();
+
+        $result = $this->request(
+            'DELETE',
+            "{$this->apiUrl}/$invalidId",
+            [],
+            $token
+        );
+
+        $statusCode = $result['statusCode'];
+        $data = $result['content'];
+
+        $this->assertInvalidId($statusCode, $data);
     }
 }

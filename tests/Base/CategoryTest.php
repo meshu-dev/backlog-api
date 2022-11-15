@@ -18,6 +18,17 @@ abstract class CategoryTest extends ApiTest
         }  
     }
 
+    protected function assertInvalidId($statusCode, $data)
+    {
+        $this->assertEquals(400, $statusCode);
+        $this->assertArrayHasKey('errors', $data);
+        $this->assertArrayHasKey('id', $data['errors']);
+        $this->assertEquals(
+            $data['errors']['id'],
+            "Category with specified id doesn't exist"
+        );
+    }
+
     protected function getCategories($token)
     {
         $result = $this->request(
