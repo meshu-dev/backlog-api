@@ -59,6 +59,41 @@ class ItemTest extends BaseItemTest
         $this->assertItem($item);
     }
 
+    public function testStopGettingItemByIdWithNoToken(): void
+    {
+        $token = $this->getAuthToken();
+        $selectedItemId = $this->getFirstItemId($token);
+
+        $result = $this->request('GET', "{$this->apiUrl}/$selectedItemId");
+
+        $this->assertEquals(401, $result['statusCode']);
+        $this->assertUnauthenticated($result['content']);
+    }
+
+    public function testGettingItemByInvalidId(): void
+    {
+        $token = $this->getAuthToken();
+        $invalidId = $this->getInvalidId();
+
+        $result = $this->request(
+            'GET',
+            "{$this->apiUrl}/$invalidId",
+            [],
+            $token
+        );
+
+        $statusCode = $result['statusCode'];
+        $data = $result['content'];
+
+        $this->assertEquals(400, $statusCode);
+        $this->assertArrayHasKey('errors', $data);
+        $this->assertArrayHasKey('id', $data['errors']);
+        $this->assertEquals(
+            $data['errors']['id'],
+            "Item with specified id doesn't exist"
+        );
+    }
+
     public function testAddingItem(): void
     {
         $token = $this->getAuthToken();
@@ -66,7 +101,7 @@ class ItemTest extends BaseItemTest
 
         $params = [
             'category_id' => $selectedCategoryId,
-            'name' => 'Item ' . time()
+            'name' => $this->getTestItemName()
         ];
 
         $result = $this->request(
@@ -81,6 +116,26 @@ class ItemTest extends BaseItemTest
         $this->assertItem($item, $params);
     }
 
+    public function testStopAddingItemWithNoToken(): void
+    {
+        $token = $this->getAuthToken();
+        $selectedCategoryId = $this->getFirstItemCategoryId($token);
+
+        $params = [
+            'category_id' => $selectedCategoryId,
+            'name' => $this->getTestItemName()
+        ];
+
+        $result = $this->request(
+            'POST',
+            $this->apiUrl,
+            $params
+        );
+
+        $this->assertEquals(401, $result['statusCode']);
+        $this->assertUnauthenticated($result['content']);
+    }
+
     public function testEditingItem(): void
     {
         $token = $this->getAuthToken();
@@ -88,7 +143,7 @@ class ItemTest extends BaseItemTest
 
         $params = [
             'category_id' => $firstItem['category']['id'],
-            'name' => 'Item ' . time()
+            'name' => $this->getTestItemName()
         ];
 
         $result = $this->request(
@@ -101,6 +156,26 @@ class ItemTest extends BaseItemTest
         $item = $result['content']['data'] ?? null;
 
         $this->assertItem($item, $params);
+    }
+
+    public function testStopEditingItemWithNoToken(): void
+    {
+        $token = $this->getAuthToken();
+        $firstItem = $this->getFirstItem($token);
+
+        $params = [
+            'category_id' => $firstItem['category']['id'],
+            'name' => $this->getTestItemName()
+        ];
+
+        $result = $this->request(
+            'PUT',
+            "{$this->apiUrl}/{$firstItem['id']}",
+            $params
+        );
+
+        $this->assertEquals(401, $result['statusCode']);
+        $this->assertUnauthenticated($result['content']);
     }
 
     public function testDeletingItem(): void
@@ -118,5 +193,19 @@ class ItemTest extends BaseItemTest
 
             $this->assertEquals(204, $result['statusCode']);
         }
+    }
+
+    public function testStopDeletingItemWithNoToken(): void
+    {
+        $token = $this->getAuthToken();
+        $item = $this->getLastItem($token);
+
+        $result = $this->request(
+            'DELETE',
+            "{$this->apiUrl}/{$item['id']}"
+        );
+
+        $this->assertEquals(401, $result['statusCode']);
+        $this->assertUnauthenticated($result['content']);
     }
 }

@@ -57,4 +57,22 @@ abstract class CategoryTest extends ApiTest
         $category = $this->getFirstCategory($token);
         return $category['id'] ?? 0;
     }
+
+    protected function getTestCategoryName()
+    {
+        return 'Category ' . time();
+    }
+
+    protected function addTestCategory($token)
+    {
+        $result = $this->request(
+            'POST',
+            $this->apiUrl,
+            ['name' => $this->getTestCategoryName()],
+            $token
+        );
+
+        $category = $result['content']['data'] ?? null;
+        return $category;
+    }
 }

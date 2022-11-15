@@ -9,15 +9,14 @@ class IndexTest extends ApiTest
 {
     public function testIndexGetsTimestamp(): void
     {
-        $this->client->request('GET', '/');
-        $response = $this->client->getResponse();
+        $result = $this->request('GET', '/');
 
-        $content = $response->getContent();
-        $content = json_decode($content, true);
+        $statusCode = $result['statusCode'];
+        $data = $result['content'];
 
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertArrayHasKey('msg', $content);
-        $this->assertArrayHasKey('time', $content);
-        $this->assertEquals($content['msg'], 'Server is running OK');
+        $this->assertEquals(200, $statusCode);
+        $this->assertArrayHasKey('msg', $data);
+        $this->assertArrayHasKey('time', $data);
+        $this->assertEquals($data['msg'], 'Server is running OK');
     }
 }

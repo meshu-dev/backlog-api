@@ -68,4 +68,9 @@ abstract class ItemTest extends ApiTest
         $item = $this->getFirstItem($token);
         return $item['category']['id'] ?? 0;
     }
+
+    protected function getTestItemName()
+    {
+        return 'Category ' . time();
+    }
 }

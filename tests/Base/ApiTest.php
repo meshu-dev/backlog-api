@@ -87,27 +87,8 @@ abstract class ApiTest extends WebTestCase
         }
     }
 
-    /*
-    protected function login2()
+    protected function getInvalidId()
     {
-        $params = [
-            'email' => 'harmeshuppal@gmail.com',
-            'password' => 'testtest'
-        ];
-        $result = $this->request('POST', 'login_check3', $params);
-
-        dd($result);
+        return 9999999;
     }
-
-    protected function getAuthToken2()
-    {
-        $params = [
-            'email' => 'harmeshuppal@gmail.com',
-            'password' => 'testtest'
-        ];
-
-        $result = $this->request('POST', 'login', $params);
-
-        return $result['token'] ?? null;
-    } */
 }
