@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Tests\Base\ApiTest;
 
 class IndexTest extends ApiTest
 {

@@ -3,23 +3,22 @@
 namespace App\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Tests\Base\ItemTest as BaseItemTest;
 
-class ItemTest extends ApiTest
+class ItemTest extends BaseItemTest
 {
     protected $apiUrl = '/items';
-    protected $selectedCategoryId;
-    protected $selectedItemId;
-
-    protected function setUp(): void
-    {
-        $this->selectedCategoryId = 1;
-        $this->selectedItemId = 1;
-        parent::setUp();
-    }
 
     public function testGettingListOfItems(): void
     {
-        $result = $this->request('GET', $this->apiUrl);
+        $token = $this->getAuthToken();
+        
+        $result = $this->request(
+            'GET',
+            $this->apiUrl,
+            [],
+            $token
+        );
 
         $this->assertEquals(200, $result['statusCode']);
         $this->assertArrayHasKey('data', $result['content']);
@@ -32,9 +31,25 @@ class ItemTest extends ApiTest
         }
     }
 
+    public function testStopGettingListOfItemsWithNoToken(): void
+    {
+        $result = $this->request('GET', $this->apiUrl);
+
+        $this->assertEquals(401, $result['statusCode']);
+        $this->assertUnauthenticated($result['content']);
+    }
+
     public function testGettingItemById(): void
     {
-        $result = $this->request('GET', "{$this->apiUrl}/{$this->selectedItemId}");
+        $token = $this->getAuthToken();
+        $selectedItemId = $this->getFirstItemId($token);
+
+        $result = $this->request(
+            'GET',
+            "{$this->apiUrl}/$selectedItemId",
+            [],
+            $token
+        );
 
         $this->assertEquals(200, $result['statusCode']);
         $this->assertArrayHasKey('data', $result['content']);
@@ -46,15 +61,19 @@ class ItemTest extends ApiTest
 
     public function testAddingItem(): void
     {
+        $token = $this->getAuthToken();
+        $selectedCategoryId = $this->getFirstItemCategoryId($token);
+
         $params = [
-            'category_id' => $this->selectedCategoryId,
+            'category_id' => $selectedCategoryId,
             'name' => 'Item ' . time()
         ];
 
         $result = $this->request(
             'POST',
             $this->apiUrl,
-            $params
+            $params,
+            $token
         );
 
         $item = $result['content']['data'] ?? null;
@@ -64,15 +83,19 @@ class ItemTest extends ApiTest
 
     public function testEditingItem(): void
     {
+        $token = $this->getAuthToken();
+        $firstItem = $this->getFirstItem($token);
+
         $params = [
-            'category_id' => $this->selectedCategoryId,
+            'category_id' => $firstItem['category']['id'],
             'name' => 'Item ' . time()
         ];
 
         $result = $this->request(
             'PUT',
-            "{$this->apiUrl}/{$this->selectedItemId}",
-            $params
+            "{$this->apiUrl}/{$firstItem['id']}",
+            $params,
+            $token
         );
 
         $item = $result['content']['data'] ?? null;
@@ -82,32 +105,18 @@ class ItemTest extends ApiTest
 
     public function testDeletingItem(): void
     {
-        $result = $this->request('GET', $this->apiUrl);
-
-        $data = $result['content']['data'] ?? null;
+        $token = $this->getAuthToken();
+        $item = $this->getLastItem($token);
         
-        if (count($data) > 0) {
-            $item = $data[array_key_last($data)];
-            $result = $this->request('DELETE', "{$this->apiUrl}/{$item['id']}");
+        if (isset($item) === true) {
+            $result = $this->request(
+                'DELETE',
+                "{$this->apiUrl}/{$item['id']}",
+                [],
+                $token
+            );
 
             $this->assertEquals(204, $result['statusCode']);
-        }
-    }
-
-    protected function assertItem($item, $params = [])
-    {
-        if ($item) {
-            $this->assertArrayHasKey('id', $item);
-            $this->assertArrayHasKey('name', $item);
-
-            $this->assertArrayHasKey('category', $item);
-            $this->assertArrayHasKey('id', $item['category']);
-            $this->assertArrayHasKey('name', $item['category']);
-
-            if (count($params) > 0) {
-                $this->assertEquals($params['category_id'], $item['category']['id']);
-                $this->assertEquals($params['name'], $item['name']);
-            }
         }
     }
 }

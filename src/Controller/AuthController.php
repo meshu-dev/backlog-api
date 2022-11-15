@@ -8,15 +8,27 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use App\Entity\User;
 
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+
+use App\Repository\UserRepository;
+
 class AuthController extends AbstractController
 {
-    #[Route('/login', name: 'api_login')]
-    public function login(#[CurrentUser] ?User $user): JsonResponse
+    #[Route('/login2', name: 'api_login')]
+    public function login(UserRepository $userRepository, JWTTokenManagerInterface $JWTManager): JsonResponse
     {
+        $u = $userRepository->find(3);
+
+    //dd($u);
+
+        return new JsonResponse(['token' => $JWTManager->create($u)]);
+
+        /*
         if (null === $user) {
             return $this->json([
                 'message' => 'missing credentials',
-            ], Response::HTTP_UNAUTHORIZED);
+            ], 401);
         }
         $token = 'TOKEN';
 
@@ -24,5 +36,10 @@ class AuthController extends AbstractController
             'user' => $user->getUserIdentifier(),
             'token' => $token,
         ]);
+
+        public function getTokenUser(UserInterface $user, JWTTokenManagerInterface $JWTManager): JsonResponse
+        {
+            return new JsonResponse(['token' => $JWTManager->create($user)]);
+        } */
     }
 }

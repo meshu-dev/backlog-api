@@ -4,21 +4,22 @@ namespace App\Tests;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\Entity\Category;
+use App\Tests\Base\CategoryTest as BaseCategoryTest;
 
-class CategoryTest extends ApiTest
+class CategoryTest extends BaseCategoryTest
 {
     protected $apiUrl = '/categories';
-    protected $selectedId;
-
-    protected function setUp(): void
-    {
-        $this->selectedId = 1;
-        parent::setUp();
-    }
 
     public function testGettingListOfCategories(): void
     {
-        $result = $this->request('GET', $this->apiUrl);
+        $token = $this->getAuthToken();
+
+        $result = $this->request(
+            'GET',
+            $this->apiUrl,
+            [],
+            $token
+        );
 
         $this->assertEquals(200, $result['statusCode']);
         $this->assertArrayHasKey('data', $result['content']);
@@ -33,7 +34,15 @@ class CategoryTest extends ApiTest
 
     public function testGettingCategoryById(): void
     {
-        $result = $this->request('GET', "{$this->apiUrl}/{$this->selectedId}");
+        $token = $this->getAuthToken();
+        $selectedCategoryId = $this->getFirstCategoryId($token);
+
+        $result = $this->request(
+            'GET',
+            "{$this->apiUrl}/$selectedCategoryId",
+            [],
+            $token
+        );
 
         $this->assertEquals(200, $result['statusCode']);
         $this->assertArrayHasKey('data', $result['content']);
@@ -45,11 +54,14 @@ class CategoryTest extends ApiTest
 
     public function testAddingCategory(): void
     {
+        $token = $this->getAuthToken();
         $categoryName = 'Category ' . time();
+
         $result = $this->request(
             'POST',
             $this->apiUrl,
-            ['name' => $categoryName]
+            ['name' => $categoryName],
+            $token
         );
 
         $this->assertEquals(201, $result['statusCode']);
@@ -62,16 +74,15 @@ class CategoryTest extends ApiTest
 
     public function testEditingCategory(): void
     {
-        $categoryName = 'Category ' . time();
-
-        $result = $this->request('GET', "{$this->apiUrl}/{$this->selectedId}");
-        $category = $result['content']['data'] ?? null;
+        $token = $this->getAuthToken();
+        $selectedCategoryId = $this->getFirstCategoryId($token);
 
         $categoryName = 'Category ' . time();
         $result = $this->request(
             'PUT',
-            "{$this->apiUrl}/{$category['id']}",
-            ['name' => $categoryName]
+            "{$this->apiUrl}/$selectedCategoryId",
+            ['name' => $categoryName],
+            $token
         );
 
         $this->assertEquals(200, $result['statusCode']);
@@ -84,27 +95,27 @@ class CategoryTest extends ApiTest
 
     public function testDeletingCategory(): void
     {
-        $result = $this->request('GET', $this->apiUrl);
+        $token = $this->getAuthToken();
+        $categoryName = 'Category ' . time();
 
-        $data = $result['content']['data'] ?? null;
+        $result = $this->request(
+            'POST',
+            $this->apiUrl,
+            ['name' => $categoryName],
+            $token
+        );
+
+        $category = $result['content']['data'] ?? null;
         
-        if (count($data) > 0) {
-            $category = $data[array_key_last($data)];
-            $result = $this->request('DELETE', "{$this->apiUrl}/{$category['id']}");
+        if (isset($category) === true) {
+            $result = $this->request(
+                'DELETE',
+                "{$this->apiUrl}/{$category['id']}",
+                [],
+                $token
+            );
 
             $this->assertEquals(204, $result['statusCode']);
         }
-    }
-
-    protected function assertCategory($category, $name = null)
-    {
-        if ($category) {
-            $this->assertArrayHasKey('id', $category);
-            $this->assertArrayHasKey('name', $category);
-
-            if ($name) {
-                $this->assertEquals($name, $category['name']);
-            }
-        }  
     }
 }

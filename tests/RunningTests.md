@@ -14,6 +14,10 @@ Use the following commands in the terminal to generate table, seeed test data
 
 `php bin/console --env=test doctrine:fixtures:load`
 
+**Refresh fixtures to add test data**
+
+`php bin/console --env=test doctrine:fixtures:load`
+
 **Drop database**
 
 `php bin/console --env=test doctrine:database:drop`

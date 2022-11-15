@@ -4,16 +4,9 @@ lexik_jwt_authentication:
     #pass_phrase: '%env(JWT_PASSPHRASE)%' # required for token creation
     #token_ttl: 3600 # in seconds, default is 3600
 
-    secret_key: '%env(JWT_SECRET_KEY)%'
-    public_key: '%env(JWT_PUBLIC_KEY)%'
+    secret_key: '%env(resolve:JWT_SECRET_KEY)%'
+    public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
     pass_phrase: '%env(JWT_PASSPHRASE)%'
     token_ttl: 3600
     encoder:
         signature_algorithm: HS256
-
-    token_extractors:
-        authorization_header:      # look for a token as Authorization Header
-            enabled: true
-            prefix:  Bearer
-            name:    Authorization
-
