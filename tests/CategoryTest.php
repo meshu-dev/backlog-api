@@ -8,8 +8,6 @@ use App\Tests\Base\CategoryTest as BaseCategoryTest;
 
 class CategoryTest extends BaseCategoryTest
 {
-    protected $apiUrl = '/categories';
-
     public function testGettingListOfCategories(): void
     {
         $token = $this->getAuthToken();
@@ -32,7 +30,7 @@ class CategoryTest extends BaseCategoryTest
         }
     }
 
-    public function testStopGettingListOfCategoriesWithNoToken(): void
+    public function testGettingListOfCategoriesWithNoToken(): void
     {
         $result = $this->request('GET', $this->apiUrl);
 
@@ -60,7 +58,7 @@ class CategoryTest extends BaseCategoryTest
         $this->assertCategory($category);
     }
 
-    public function testStopGettingCategoryByIdWithNoToken(): void
+    public function testGettingCategoryByIdWithNoToken(): void
     {
         $token = $this->getAuthToken();
         $selectedCategoryId = $this->getFirstCategoryId($token);
@@ -109,7 +107,7 @@ class CategoryTest extends BaseCategoryTest
         $this->assertCategory($category, $categoryName);
     }
 
-    public function testStopAddingCategoryWithNoToken(): void
+    public function testAddingCategoryWithNoToken(): void
     {
         $result = $this->request(
             'POST',
@@ -119,6 +117,26 @@ class CategoryTest extends BaseCategoryTest
 
         $this->assertEquals(401, $result['statusCode']);
         $this->assertUnauthenticated($result['content']);
+    }
+
+    public function testAddingCategoryWithDuplicateName(): void
+    {
+        $token = $this->getAuthToken();
+        $category = $this->getFirstCategory($token);
+
+        $result = $this->request(
+            'POST',
+            $this->apiUrl,
+            ['name' => $category['name']],
+            $token
+        );
+
+        $data = $result['content'] ?? null;
+        
+        $this->assertDuplicateName(
+            $result['statusCode'],
+            $data
+        );
     }
 
     public function testEditingCategory(): void
@@ -142,7 +160,7 @@ class CategoryTest extends BaseCategoryTest
         $this->assertCategory($category, $categoryName);
     }
 
-    public function testStopEditingCategoryWithNoToken(): void
+    public function testEditingCategoryWithNoToken(): void
     {
         $token = $this->getAuthToken();
         $selectedCategoryId = $this->getFirstCategoryId($token);
@@ -172,7 +190,7 @@ class CategoryTest extends BaseCategoryTest
         $this->assertEquals(204, $result['statusCode']);
     }
 
-    public function testStopDeletingCategoryWithNoToken(): void
+    public function testDeletingCategoryWithNoToken(): void
     {
         $token = $this->getAuthToken();
         $category = $this->addTestCategory($token);

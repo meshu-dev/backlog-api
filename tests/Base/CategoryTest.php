@@ -6,6 +6,8 @@ use App\Tests\Base\ApiTest;
 
 abstract class CategoryTest extends ApiTest
 {
+    protected $apiUrl = '/categories';
+
     protected function assertCategory($category, $name = null)
     {
         if ($category) {
@@ -26,6 +28,17 @@ abstract class CategoryTest extends ApiTest
         $this->assertEquals(
             $data['errors']['id'],
             "Category with specified id doesn't exist"
+        );
+    }
+
+    protected function assertDuplicateName($statusCode, $data)
+    {
+        $this->assertEquals(500, $result['statusCode']);
+        $this->assertArrayHasKey('errors', $data);
+        $this->assertArrayHasKey('name', $data['errors']);
+        $this->assertEquals(
+            $data['errors']['name'][0],
+            'This value is already used.'
         );
     }
 
@@ -71,7 +84,7 @@ abstract class CategoryTest extends ApiTest
 
     protected function getTestCategoryName()
     {
-        return 'Category ' . time();
+        return 'Category ' . uniqid();
     }
 
     protected function addTestCategory($token)

@@ -7,8 +7,6 @@ use App\Tests\Base\ItemTest as BaseItemTest;
 
 class ItemTest extends BaseItemTest
 {
-    protected $apiUrl = '/items';
-
     public function testGettingListOfItems(): void
     {
         $token = $this->getAuthToken();
@@ -31,7 +29,7 @@ class ItemTest extends BaseItemTest
         }
     }
 
-    public function testStopGettingListOfItemsWithNoToken(): void
+    public function testGettingListOfItemsWithNoToken(): void
     {
         $result = $this->request('GET', $this->apiUrl);
 
@@ -59,7 +57,7 @@ class ItemTest extends BaseItemTest
         $this->assertItem($item);
     }
 
-    public function testStopGettingItemByIdWithNoToken(): void
+    public function testGettingItemByIdWithNoToken(): void
     {
         $token = $this->getAuthToken();
         $selectedItemId = $this->getFirstItemId($token);
@@ -110,7 +108,7 @@ class ItemTest extends BaseItemTest
         $this->assertItem($item, $params);
     }
 
-    public function testStopAddingItemWithNoToken(): void
+    public function testAddingItemWithNoToken(): void
     {
         $token = $this->getAuthToken();
         $selectedCategoryId = $this->getFirstItemCategoryId($token);
@@ -152,7 +150,7 @@ class ItemTest extends BaseItemTest
         $this->assertItem($item, $params);
     }
 
-    public function testStopEditingItemWithNoToken(): void
+    public function testEditingItemWithNoToken(): void
     {
         $token = $this->getAuthToken();
         $firstItem = $this->getFirstItem($token);
@@ -189,7 +187,7 @@ class ItemTest extends BaseItemTest
         }
     }
 
-    public function testStopDeletingItemWithNoToken(): void
+    public function testDeletingItemWithNoToken(): void
     {
         $token = $this->getAuthToken();
         $item = $this->getLastItem($token);

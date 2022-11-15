@@ -6,6 +6,8 @@ use App\Tests\Base\ApiTest;
 
 abstract class ItemTest extends ApiTest
 {
+    protected $apiUrl = '/items';
+    
     protected function assertItem($item, $params = [])
     {
         if ($item) {
