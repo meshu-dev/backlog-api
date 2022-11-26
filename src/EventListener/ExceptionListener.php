@@ -28,6 +28,6 @@ class ExceptionListener
             Response::HTTP_INTERNAL_SERVER_ERROR
         );
         
-        $event->setResponse($response);
+        $event->getResponse()->setContent($response);
     }
 }

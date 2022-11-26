@@ -9,11 +9,13 @@ class ItemFactory
 {
     public function make(
         Category $category,
-        string $name
+        string $name,
+        string $imageUrl
     ): Item {
         $item = new Item();
         $item->setCategory($category);
         $item->setName($name);
+        $item->setImageUrl($imageUrl);
 
         return $item;
     }

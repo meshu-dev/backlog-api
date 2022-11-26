@@ -73,6 +73,7 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
+        "dev": "symfony server:start",
         "tests": "php bin/phpunit"
     },
     "conflict": {

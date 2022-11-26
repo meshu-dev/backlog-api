@@ -53,7 +53,11 @@ class ItemController extends ApiController
             return $this->getErrorResponse(['id' => "Category with specified id doesn't exist"]);
         }
 
-        $item = $itemFactory->make($category, $params['name']);
+        $item = $itemFactory->make(
+            $category,
+            $params['name'],
+            $params['image_url'] ?? ''
+        );
 
         $errors = $this->validationService->validateEntity($item);
 
@@ -79,6 +83,10 @@ class ItemController extends ApiController
         }
         $item->setCategory($category);
         $item->setName($params['name']);
+
+        if (empty($params['image_url']) === false) {
+            $item->setImageUrl($params['image_url']);
+        }
 
         $errors = $this->validationService->validateEntity($item);
 
