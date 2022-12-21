@@ -10,3 +10,23 @@ lexik_jwt_authentication:
     token_ttl: 3600
     encoder:
         signature_algorithm: HS256
+    
+    token_extractors:
+        authorization_header:
+            enabled: false
+
+        cookie:
+            enabled: true
+            name: access_token
+
+    set_cookies:
+        access_token:
+            lifetime: '%env(resolve:AUTH_COOKIE_EXPIRY)%'
+            samesite: lax
+            path: /
+            domain: '%env(resolve:AUTH_COOKIE_DOMAIN)%'
+            secure: false
+            httpOnly: true
+
+    remove_token_from_body_when_cookies_used: true
+
