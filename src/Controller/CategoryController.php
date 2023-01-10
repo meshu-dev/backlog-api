@@ -24,7 +24,7 @@ class CategoryController extends ApiController
     #[Route('/categories', name: 'category_get_all', methods: ['GET'])]
     public function getAll(): JsonResponse
     {
-        $categories = $this->categoryRepository->findAll();
+        $categories = $this->categoryRepository->findBy([], ['name' => 'ASC']);
 
         return $this->getResponse($categories);
     }

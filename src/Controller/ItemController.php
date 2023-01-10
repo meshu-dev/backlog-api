@@ -26,7 +26,7 @@ class ItemController extends ApiController
     #[Route('/items', name: 'item_get_all', methods: ['GET'])]
     public function getAll(): JsonResponse
     {
-        $items = $this->itemRepository->findAll();
+        $items = $this->itemRepository->findBy([], ['name' => 'ASC']);
 
         return $this->getResponse($items);
     }
