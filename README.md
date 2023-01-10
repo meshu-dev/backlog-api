@@ -30,5 +30,5 @@ php bin/console doctrine:fixtures:load
 ```
 -  Run on local environment
 ```
-php bin/console server:start
+composer run dev
 ```
