@@ -2,11 +2,12 @@
 
 namespace App\DataFixtures;
 
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 use App\Entity\Category;
 use App\Entity\Item;
 
-class AppFixtures extends BaseFixture
+class TestDataFixtures extends BaseFixture implements FixtureGroupInterface
 {
     public function loadData()
     {
@@ -35,5 +36,10 @@ class AppFixtures extends BaseFixture
         });
 
         $this->manager->flush();
+    }
+
+    public static function getGroups(): array
+    {
+        return ['test'];
     }
 }
