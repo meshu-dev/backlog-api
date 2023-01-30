@@ -39,9 +39,15 @@ php bin/console lexik:jwt:generate-keypair
 ```
 php bin/console doctrine:migrations:migrate
 ```
--  Run data fixtures for test data
+
+-  Run data fixtures for test data and user
 ```
-php bin/console doctrine:fixtures:load
+composer run fixtures:test
+```
+
+-  Run data fixtures to add default categories and user
+```
+composer run fixtures:live
 ```
 
 ## Run development version
