@@ -9,7 +9,6 @@
         "ext-iconv": "*",
         "doctrine/annotations": "^1.0",
         "doctrine/doctrine-bundle": "^2.7",
-        "doctrine/doctrine-fixtures-bundle": "^3.4",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.13",
         "lexik/jwt-authentication-bundle": "^2.16",
@@ -75,7 +74,7 @@
             "@auto-scripts"
         ],
         "dev": "symfony server:start",
-        "fixtures:live": "php bin/console doctrine:fixtures:load --group=live",
+        "fixtures:live": "php bin/console --env=dev doctrine:fixtures:load --group=live",
         "fixtures:test": "php bin/console doctrine:fixtures:load --group=test",
         "tests": "php bin/phpunit"
     },
@@ -89,6 +88,7 @@
         }
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^3.4",
         "fakerphp/faker": "^1.20",
         "phpunit/phpunit": "^9.5",
         "symfony/browser-kit": "6.1.*",
